@@ -1,0 +1,235 @@
+/*1.map as key value
+2.construct Roman out of string words
+3.get value from that roman and then apply elementary method to find one unit value of something*/
+
+using System.Collections;
+
+namespace MerchantProblem
+{
+    
+    public class Program
+    {
+        public static ArrayList ans = new ArrayList();
+
+        public static Hashtable initialItemMap = new Hashtable();
+        public static Hashtable perItemValue = new Hashtable();
+        public static int RomanNumerals(char c)
+        {
+            switch (c)
+            {
+                case 'I': return 1;
+                case 'V': return 5;
+                case 'X': return 10;
+                case 'L': return 50;
+                case 'C': return 100;
+                case 'D': return 500;
+                case 'M': return 1000;
+            };
+            return 0;
+        }
+        public static int RomanToInt(string s)
+        {
+
+            if(s.Length==0) return 1;
+            var chars = s.ToCharArray();
+            var result = 0;
+            var currentValue = 0;
+            for (var i = 0; i < chars.Length - 1; i++)
+            {
+                currentValue = RomanNumerals(chars[i]);
+                result += (RomanNumerals(chars[i + 1]) > currentValue ? -1 : 1) * currentValue;
+            }
+
+            return result + RomanNumerals(chars[chars.Length - 1]);
+        }
+
+        
+
+        static void ProcessInitialValueFromStatement(string initialStatement)
+        {
+            int wordNumber = 1;
+            ArrayList temp=new ArrayList();
+
+
+            string[] strs = initialStatement.Split(" ");
+
+
+            initialItemMap.Add(strs[0], strs[2]);
+
+        }
+
+
+        static void GrabUnitValueOfSomething(string unitValueStatement)
+        {
+            int value = 0;
+            string temp = "";
+            string item = "";
+            int totalQtyOfItems=0;
+            foreach (String val in unitValueStatement.Split(" "))
+            {
+                if (val.ToLower() == "credits" || val.ToLower() == "is")
+                    continue;
+                if(initialItemMap.ContainsKey(val)==true)
+                {
+                    temp += initialItemMap[val];
+                }
+                else
+                {
+                    // check if its item value 
+                    int number;
+                    if (int.TryParse(val, out number))
+                    {
+                        value = number;
+                    }
+                    else item = val;
+                }
+            }
+
+            // convert temp which is roman to numerical value
+            totalQtyOfItems = RomanToInt(temp);
+
+
+            // Contain per item value in map
+            perItemValue.Add(item, (double)value / (double)totalQtyOfItems);
+
+
+
+
+        }
+
+
+        static void ProcessQueries(string queries)
+        {
+            string item = "";
+            string itemQty = "";
+            int qty = 0;
+            int calculatedValue = 0;
+            double qtyValue = 0;
+            if (queries.StartsWith("how many Credits is") == true)
+            {
+                foreach (String val in queries.Split(" "))
+                {
+                    if(initialItemMap.ContainsKey(val)==true)
+                    {
+                        itemQty += initialItemMap[val];
+                        //Console.WriteLine("Hello");
+
+                    }
+                    else if(perItemValue.ContainsKey(val)==true)
+                    {
+                        item = val;
+                    }
+                    
+                    qty = RomanToInt(itemQty);
+                    qtyValue = Convert.ToDouble(perItemValue[item]);
+
+                }
+                    ans.Add(item+" is "+ qtyValue * qty+" Credits");
+            }
+            else if (queries.StartsWith("how much is") == true)
+            {
+                string roman = "";
+                foreach (String val in queries.Split(" "))
+                {
+                    if (initialItemMap.ContainsKey(val) == true)
+                    {
+                        roman += val;
+                        roman += " ";
+                        itemQty += initialItemMap[val];
+
+                    }
+                }
+                qty = RomanToInt(itemQty);
+
+                ans.Add(roman + " is " + qty);
+               
+            }
+            else
+                ans.Add("I have no idea what you are talking about");
+            
+        }
+
+
+
+        public static void Main()
+        {
+
+            string[] initialValueStatement =
+            {
+                "glob is I",
+                "prok is V",
+                "pish is X",
+                "tegj is L"
+            };
+
+
+
+            // number of initialisation statement
+
+            //int initialValueStatementCount = 4;
+
+            for (int i = 0; i < initialValueStatement.Length; i++)
+            {
+                /* string initialStatement;
+                 initialStatement=Console.ReadLine();*/
+
+
+                // Step 1 : Map as key value pair
+                ProcessInitialValueFromStatement(initialValueStatement[i]);
+
+            }
+
+            
+
+
+
+            string[] unitValueStatement =
+            {
+                "glob glob Silver is 34 Credits",
+                "glob prok Gold is 57800 Credits",
+                "pish pish Iron is 3910 Credits"
+            };
+
+            // Number of unit value statement
+
+            //int unitValueStatementCount = 3;
+            for (int i = 0; i < unitValueStatement.Length; i++)
+            {
+                /*string unitValueStatement;
+                unitValueStatement=Console.ReadLine();*/
+
+                // Step 2: Grab unit value of something
+                GrabUnitValueOfSomething(unitValueStatement[i]);
+            }
+
+
+            string[] queriesStatement =
+            {
+                "how much is pish tegj glob glob ?",
+                "how many Credits is glob prok Silver ?",
+                "how many Credits is glob prok Gold ?",
+                "how many Credits is glob prok Iron ?",
+                "how much wood could a woodchuck chuck if a woodchuck could chuck wood ?"
+            };
+
+            // Queries Statements
+
+            //int queriesStatementCount = 5;
+            for (int i = 0; i < queriesStatement.Length; i++)
+            {
+                /*string queries;
+                queries=Console.ReadLine();*/
+
+                // step 3: get value from that roman and then apply elementary method to find one unit value of something
+
+                //Console.WriteLine(queriesStatement[i]);
+                ProcessQueries(queriesStatement[i]);
+            }
+
+
+            foreach (var s in ans)
+                Console.WriteLine(s);
+
+        }
+    }
+}
